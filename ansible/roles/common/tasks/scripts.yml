@@ -1,0 +1,30 @@
+---
+- copy: src=cloud-scripts/per-once/{{ item | basename }} dest=/var/lib/cloud/scripts/per-once/{{ item | basename }} mode=0755
+  with_fileglob: cloud-scripts/per-once/*
+
+- copy: src=cloud-scripts/per-instance/{{ item | basename }} dest=/var/lib/cloud/scripts/per-instance/{{ item | basename }} mode=0755
+  with_fileglob: cloud-scripts/per-instance/*
+
+- copy: src=cloud-scripts/per-boot/{{ item | basename }} dest=/var/lib/cloud/scripts/per-boot/{{ item | basename }} mode=0755
+  with_fileglob: cloud-scripts/per-boot/*
+
+- file: path=/opt/ec2 state=directory
+- copy: src=scripts/ec2/{{ item | basename }} dest=/opt/ec2/{{ item | basename }} mode=0755
+  with_fileglob: scripts/ec2/*
+- file: src=/opt/ec2/update-role dest=/usr/bin/update-role force=true state=link
+
+- block:
+  - file: path=/etc/motd state=absent
+  - file: path=/etc/motd state=directory mode=0755
+  when: ansible_distribution == 'Ubuntu'
+
+- copy: src=scripts/motd/{{ item | basename }} dest=/etc/update-motd.d/{{ item | basename }} mode=0755
+  with_fileglob: scripts/motd/*
+  register: motd_scripts
+
+- block:
+  - shell: update-motd
+    when: ansible_distribution == 'Amazon'
+  - shell: bash -lc "run-parts --lsbsysinit /etc/update-motd.d > /run/motd.dynamic"
+    when: ansible_distribution == 'Ubuntu'
+  when: motd_scripts|changed

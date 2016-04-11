@@ -1,0 +1,20 @@
+---
+- block:
+  - package: name={{ item }} state=present
+    with_items:
+      - awslogs
+  - lineinfile: dest=/etc/awslogs/awscli.conf regexp="region" line="region = ap-northeast-1"
+  - template: src=awslogs.conf.j2 dest=/etc/awslogs/awslogs.conf owner=root group=root mode=0644
+    notify: restart awslogs
+  when: ansible_distribution == 'Amazon'
+
+- block:
+  - file: dest=/var/lib/awslogs mode=0755 state=directory
+  - template: src=awslogs.conf.j2 dest=/tmp/awslogs.conf mode=0600
+  - shell: |
+      wget https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py
+      python ./awslogs-agent-setup.py --region ap-northeast-1 --non-interactive --configfile /tmp/awslogs.conf
+    notify: restart awslogs
+  when: ansible_distribution == 'Ubuntu'
+
+- service: name=awslogs enabled=true

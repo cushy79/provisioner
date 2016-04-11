@@ -1,0 +1,20 @@
+---
+- name: install retry command
+  copy:
+    src: common/usr/local/bin/retry
+    dest: /usr/local/bin/retry
+    owner: root
+    group: root
+    mode: 0755
+
+# synchronizeの挙動が怪しいので、下記2タスクで代用
+- name: remove current extra plugins
+  file:
+    path: "{{ mackerel_confdir }}/plugins"
+    state: absent
+
+- name: update extra plugins
+  copy:
+    src: common/etc/mackerel-agent/plugins
+    dest: "{{ mackerel_confdir }}"
+    mode: 0755

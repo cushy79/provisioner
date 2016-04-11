@@ -1,0 +1,11 @@
+---
+- copy: src={{ item.src }} dest={{ item.dest }}
+  with_items:
+    - {src: "/usr/share/zoneinfo/Asia/Tokyo", dest: "/etc/localtime"}
+    - {src: "sysconfig/clock", dest: "/etc/sysconfig/clock"}
+  notify:
+    - restart rsyslog
+  when: ansible_distribution == 'Amazon'
+
+- shell: timedatectl set-timezone Asia/Tokyo
+  when: ansible_distribution == 'Ubuntu'

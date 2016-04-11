@@ -1,0 +1,23 @@
+#!/usr/local/rbenv/shims/ruby
+
+require 'aws-sdk'
+require 'net/http'
+require 'uri'
+
+ec2_role = Net::HTTP.get(URI.parse('http://169.254.169.254/latest/meta-data/iam/security-credentials/'))
+role = ec2_role.match(/ec2-(?<role>(.*))/)[:role]
+
+s3_bucket = ARGV[0] || 'net.cushy79.staging.common.code.ami'
+s3_key = ARGV[1] || 'latest.zip'
+s3 = Aws::S3::Client.new region: 'ap-northeast-1'
+
+tmpdir = Dir.mktmpdir
+File.open("#{tmpdir}/#{s3_key}", "w") do |file|
+  s3.get_object(bucket: s3_bucket, key: s3_key) do |chunk|
+    file.write chunk
+  end
+end
+system("unzip -o -qq -d #{tmpdir}/ami #{tmpdir}/#{s3_key}")
+
+ansible_role = File.exist?("#{tmpdir}/ami/ansible/#{role}.yml") ? role : "base"
+system("ansible-playbook #{tmpdir}/ami/ansible/#{ansible_role}.yml")

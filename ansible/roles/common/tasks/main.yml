@@ -1,0 +1,6 @@
+---
+- include: common.yml
+- include: packages.yml
+- include: timezone.yml
+- include: users.yml
+- include: scripts.yml
