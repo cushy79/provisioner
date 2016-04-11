@@ -1,0 +1,21 @@
+---
+- shell: bash -lc "rbenv versions | grep {{ ruby.version }}"
+  register: ruby_installed
+  changed_when: false
+  ignore_errors: true
+  always_run: true
+
+- shell: bash -lc "CONFIGURE_OPTS="--disable-install-rdoc" rbenv install {{ ruby.version }}"
+  when: ruby_installed.rc != 0
+
+- shell: cat {{ rbenv.path }}/version
+  register: ruby_global_version
+  changed_when: false
+  failed_when: false
+  always_run: true
+
+- shell: bash -lc "rbenv global {{ ruby.version }} && rbenv rehash"
+  when: ruby_global_version.stdout.find("{{ ruby.version }}") != 0
+
+- gem: name={{ item.name }} version={{ item.version | default(omit) }} executable=/usr/local/rbenv/shims/gem user_install=false state=present
+  with_items: "{{ ruby.gems }}"

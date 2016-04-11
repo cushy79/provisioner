@@ -1,0 +1,5 @@
+---
+- template: src={{ ec2_role }}.conf.j2 dest={{ mackerel_confdir }}/conf.d/{{ ec2_role }}.conf
+  when: aws_ec2_env.stdout|default("undefind") == "prod"
+  notify:
+    - "reload mackerel-agent"

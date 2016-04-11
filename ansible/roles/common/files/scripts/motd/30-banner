@@ -1,0 +1,45 @@
+#!/bin/bash
+
+source /etc/profile.d/ec2-env.sh
+
+COLOR_DEFAULT=$'\e[0m'
+COLOR_RED=$'\e[0;31m'
+COLOR_LIGHT_BLUE=$'\e[1;34m'
+COLOR_YELLOW=$'\e[1;33m'
+
+env=${AWS_EC2_ENV:-undefined}
+name=${AWS_EC2_NAME:-undefined}
+
+if [[ $env == "prod" ]]; then
+  color=$COLOR_RED
+elif [[ $env == "staging" ]]; then
+  color=$COLOR_YELLOW
+elif [[ $env == "dmz" ]]; then
+  color=$COLOR_LIGHT_BLUE
+else
+  color=$COLOR_DEFAULT
+fi
+
+cat <<EOF
+
+
+${color}${name}${COLOR_DEFAULT}
+
+
+Hostname              = $(curl http://169.254.169.254/latest/meta-data/local-hostname)
+Privte IP Address     = $(curl http://169.254.169.254/latest/meta-data/local-ipv4)
+Availability Zone     = $(curl http://169.254.169.254/latest/meta-data/placement/availability-zone)
+AMI ID                = $(curl http://169.254.169.254/latest/meta-data/ami-id)
+Instance Type         = $(curl http://169.254.169.254/latest/meta-data/instance-type)
+Instance Id           = $(curl http://169.254.169.254/latest/meta-data/instance-id)
+IAM Role              = $(curl http://169.254.169.254/latest/meta-data/iam/security-credentials/)
+
+Uptime                = $(uptime | sed -e 's/^ //')
+Release               = $(cat /etc/issue.net | head -n 1)
+Kernel                = $(uname -orpi)
+CPU Usage (Core)      = $(echo $(ps -eo pcpu | awk 'NR>1' | awk '{tot=tot+$1} END {print tot}') / $(cat /proc/cpuinfo | grep -c processor) | bc )%
+Memory  Used/Total    = $(free -m | head -n 2 | tail -n 1 | awk {'print $3'})/$(free -m | head -n 2 | tail -n 1 | awk {'print $2'})MB
+Swap    Used/Total    = $(free -m | tail -n 1 | awk {'print $3'})/$(free -m | tail -n 1 | awk {'print $2'})MB
+Disk(/) Used/Total    = $(df -h / | tail -n 1 | awk {'print $3'})/$(df -h / | tail -n 1 | awk {'print $2'})
+
+EOF

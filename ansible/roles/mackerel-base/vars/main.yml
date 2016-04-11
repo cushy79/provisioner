@@ -1,0 +1,10 @@
+---
+mackerel_agent_apikey: 3R2DDFLod95aNJ6ViDqMstiV3VQUMZ7tHdXF4Phnnq3P
+mackerel_confdir: /etc/mackerel-agent
+mackerel_agent_pidfile: /var/run/mackerel-agent.pid
+mackerel_agent_root: /var/lib/mackerel-agent
+mackerel_agent_plugins:
+  linux: /usr/local/bin/mackerel-plugin-linux
+  loadavg: "/etc/mackerel-agent/plugins/metrics/mackerel-plugin-linux-extended -type loadavg"
+  procs: "/etc/mackerel-agent/plugins/metrics/mackerel-plugin-linux-extended -type procs"
+  network: /etc/mackerel-agent/plugins/metrics/mackerel-plugin-linux-network

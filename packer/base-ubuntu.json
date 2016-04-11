@@ -1,0 +1,61 @@
+{
+  "variables": {
+    "base_name": "base-ubuntu",
+    "source_ami_id": "ami-a21529cc",
+    "aws_access_key": "",
+    "aws_secret_key": ""
+  },
+  "builders": [{
+    "type": "amazon-ebs",
+    "access_key": "{{user `aws_access_key`}}",
+    "secret_key": "{{user `aws_secret_key`}}",
+    "region": "{{user `region`}}",
+    "source_ami": "{{user `source_ami_id`}}",
+    "instance_type": "t2.nano",
+    "associate_public_ip_address": "true",
+    "ssh_username": "ubuntu",
+    "ssh_timeout": "5m",
+    "ssh_pty" : "true",
+    "iam_instance_profile": "ec2-common-packer",
+    "ami_name": "{{user `base_name`}}-20{{isotime \"06.01.02\"}}-{{timestamp}}",
+    "vpc_id": "{{user `vpc_id`}}",
+    "subnet_id": "{{user `subnet_id`}}",
+    "tags": {
+      "Name": "{{user `base_name`}}-20{{isotime \"06.01.02\"}}",
+      "source-ami-id": "{{user `source_ami_id`}}"
+    }
+  }],
+  "provisioners": [{
+    "type": "shell",
+    "inline": [
+      "sleep 30",
+      "sudo apt-get -y update",
+      "sudo apt-get -y upgrade",
+      "sudo apt-get -y install python2.7-dev",
+      "sudo apt-get -y install python-pip",
+      "sudo pip install 'ansible>=2.0' awscli"
+    ]
+   },{
+    "type": "ansible-local",
+    "role_paths": [
+      "ansible/roles/common",
+      "ansible/roles/ruby",
+      "ansible/roles/account",
+      "ansible/roles/cloudwatch",
+      "ansible/roles/codedeploy",
+      "ansible/roles/ssm",
+      "ansible/roles/mackerel-base"
+    ],
+    "staging_directory": "/tmp/ansible-local",
+    "playbook_file": "ansible/base.yml",
+    "extra_arguments": [
+      "--become"
+    ]
+  },{
+    "type": "shell",
+    "inline": [
+      "sudo rm -f /ec2-user/.ssh/authorized_keys",
+      "sudo rm -f /var/lib/cloud/sem/config_scripts_per_once.once"
+    ]
+  }]
+}

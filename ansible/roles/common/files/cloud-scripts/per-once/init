@@ -1,0 +1,12 @@
+#!/usr/local/rbenv/shims/ruby
+
+# AMI作成時のみ呼ばれる
+#
+# Packerのプロビジョナーの最後で/var/lib/cloud/sem/config_scripts_per_once.onceを
+# 削除することで対応
+# 参考:https://www.evernote.com/l/Ak_ejG8lcUhKSJy0Yz2FONRlWGR1lb3RgZ0
+
+require 'syslog/logger'
+
+log = Syslog::Logger.new 'scripts-per-once'
+log.info 'init.rb start'

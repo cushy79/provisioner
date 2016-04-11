@@ -1,0 +1,14 @@
+---
+- name: set auto-retire
+  lineinfile:
+    dest: /etc/sysconfig/mackerel-agent
+    regexp: '^AUTO_RETIREMENT=.*'
+    line: AUTO_RETIREMENT=1
+  when: ( mackerel_agent_autoretire is not defined ) or ( mackerel_agent_autoretire|bool )
+
+- name: disable auto-retire
+  lineinfile:
+    dest: /etc/sysconfig/mackerel-agent
+    regexp: '^AUTO_RETIREMENT=.*'
+    line: AUTO_RETIREMENT=0
+  when: ( mackerel_agent_autoretire is defined ) and ( not mackerel_agent_autoretire|bool )

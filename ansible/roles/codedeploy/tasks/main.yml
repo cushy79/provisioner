@@ -1,0 +1,32 @@
+---
+- shell: |
+    cd /tmp
+    aws s3 cp s3://aws-codedeploy-ap-northeast-1/latest/install . --region ap-northeast-1
+    chmod +x ./install
+    ./install auto
+  args:
+    creates: /etc/init.d/codedeploy-agent
+  when: ansible_distribution == 'Amazon'
+  notify: restart codedeploy-agent
+
+# 2016/02/18 CodeDeployエージェントのインストールは2.0系のみ動作
+- block:
+  - apt: name=ruby2.0 state=present
+  - shell: |
+      cd /tmp
+      aws s3 cp s3://aws-codedeploy-ap-northeast-1/latest/install . --region ap-northeast-1
+      chmod +x ./install
+      /usr/bin/ruby2.0 ./install auto
+    args:
+      creates: /etc/init.d/codedeploy-agent
+    notify: restart codedeploy-agent
+  when: ansible_distribution == 'Ubuntu'
+
+- service: name=codedeploy-agent enabled=true
+
+# https://github.com/awslabs/aws-codedeploy-samples/tree/master/load-balancing/elb
+# Githubへの依存関係をなくすため、スクリプトをクローンではなくコピーする
+- block:
+  - file: path=/opt/codedeploy/elb state=directory
+  - copy: src=elb-scripts-ada6322/{{ item | basename }} dest=/opt/codedeploy/elb owner=root group=root mode=0755
+    with_fileglob: elb-scripts-ada6322/*

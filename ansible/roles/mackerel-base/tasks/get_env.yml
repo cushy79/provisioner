@@ -1,0 +1,15 @@
+---
+- name: get aws_ec2_env
+  shell: |
+    test -f /etc/profile.d/ec2-env.sh && source /etc/profile.d/ec2-env.sh >/dev/null 2>&1
+    echo "${AWS_EC2_ENV:-undefined}"
+  register: aws_ec2_env
+
+- debug: var=aws_ec2_env
+
+- shell: |
+    whoami
+    env
+  register: who
+
+- debug: var=who

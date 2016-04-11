@@ -1,0 +1,5 @@
+---
+- file: src=/usr/local/bin/ansible-playbook dest=/usr/bin/ansible-playbook force=true state=link
+
+- file: path=/etc/ansible state=directory
+- copy: src=ansible/ansible.cfg dest=/etc/ansible/ansible.cfg

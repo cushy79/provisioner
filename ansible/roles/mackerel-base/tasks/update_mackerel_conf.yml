@@ -1,0 +1,7 @@
+---
+- name: update mackerel conf
+  template:
+    src: mackerel-agent.conf.j2
+    dest: "{{ mackerel_confdir }}/mackerel-agent.conf"
+
+- file: path={{ mackerel_confdir }}/conf.d state=directory
