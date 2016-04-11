@@ -1,0 +1,34 @@
+#!/usr/local/rbenv/shims/ruby
+
+require 'uri'
+require 'net/http'
+require 'aws-sdk'
+require 'yaml'
+require 'ipaddr'
+
+REGION = 'ap-northeast-1'
+META_ENDPOINT = "http://169.254.169.254/latest/meta-data"
+PROFIE_ENV_SHELL_PATH = "/etc/profile.d/ec2-env.sh"
+
+instance_id = Net::HTTP.get(URI.parse("#{META_ENDPOINT}/instance-id"))
+ip_address = Net::HTTP.get(URI.parse("#{META_ENDPOINT}/local-ipv4"))
+ec2_role = Net::HTTP.get(URI.parse("#{META_ENDPOINT}/iam/security-credentials/"))
+
+env = case ip_address
+when IPAddr.new('172.16.0.0/16') then {name: 'prod', color: '\e[1;34m'}
+when IPAddr.new('172.17.0.0/16') then {name: 'dev', color: '\e[0m'}
+when IPAddr.new('172.18.0.0/16') then {name: 'staging', color: '\e[1;33m'}
+when IPAddr.new('172.24.0.0/16') then {name: 'prod', color: '\e[0;31m'}
+when IPAddr.new('172.32.0.0/16') then {name: 'misc', color: '\e[0;35m'}
+else {name: 'undefined', color: '\e[0m'}
+end
+
+match_data = ec2_role.match(/ec2-(?<role>(.*))/)
+role = match_data[:role]
+
+File.open(PROFIE_ENV_SHELL_PATH, mode = "w", perm = 0644) do |f|
+  f.puts '#!/bin/bash'
+  f.puts "export AWS_EC2_ENV=#{env[:name]}"
+  f.puts "export AWS_EC2_NAME=#{env[:name]}-#{role}"
+  f.puts 'export PS1="' + env[:color] + '[\u@\h \W]\$ \e[m"'
+end

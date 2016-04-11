@@ -1,0 +1,41 @@
+{% if mackerel_role is defined %}
+roles = [
+  "{{ mackerel_role }}"
+]
+{% endif %}
+
+[plugin.checks.fs_readonly]
+command = '/etc/mackerel-agent/plugins/checks/check_mount_readonly.py "^/mnt"'
+
+##[plugin.checks.td-agent_procs]
+##command = '/usr/local/bin/check-procs -C 1 -p "/usr/sbin/td-agent"'
+
+[plugin.checks.crond_procs]
+command = '/usr/local/bin/check-procs -C 1 -p "crond"'
+
+#
+# log check
+#
+[plugin.checks.log_messages]
+command = '/usr/local/bin/check-log --file /var/log/messages --pattern "segfault" -c 2'
+
+#
+# Nginx monitors
+#
+[plugin.metrics.nginx]
+command = "/usr/local/bin/mackerel-plugin-nginx"
+
+[plugin.checks.nginx_master_procs]
+command = '/usr/local/bin/check-procs -C 1 -p "nginx: master process"'
+
+[plugin.checks.nginx_worker_procs]
+command = '/usr/local/bin/retry -maxElapsedTime 10 /usr/local/bin/check-procs -C 1 -p "nginx: worker process"'
+
+[plugin.checks.nginx_cache_manager_procs]
+command = '/usr/local/bin/retry -maxElapsedTime 10 /usr/local/bin/check-procs -C 1 -p "nginx: cache manager process"'
+
+#
+# lvimg monitors
+#
+[plugin.checks.lvimg_procs]
+command = '/usr/local/bin/retry -maxElapsedTime 10 /usr/local/bin/check-procs -C 1 -u lvimg -p "/usr/local/bin/lvimg"'

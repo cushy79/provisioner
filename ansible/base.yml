@@ -1,0 +1,18 @@
+---
+
+# 2016/03/30
+# Packerがroleのsubdirectoryに対応していないため
+# mackerel/baseからmackerel-baseに移動
+# TODO: Packerが対応次第、mackerel/baseに戻す
+
+- hosts: localhost
+  gather_facts: true
+  #become: true
+  roles:
+    - common
+    - ruby
+    - account
+    - codedeploy
+    - cloudwatch
+    - ssm
+    - mackerel-base

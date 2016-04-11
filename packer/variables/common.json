@@ -1,0 +1,6 @@
+{
+  "region": "ap-northeast-1",
+  "instance_type": "t2.nano",
+  "vpc_id": "vpc-fb0b789e",
+  "subnet_id": "subnet-a3adf0d4"
+}

@@ -1,0 +1,18 @@
+---
+- name: set status maintenance
+  shell: |
+    [ -f /var/lib/mackerel-agent/id ] && /usr/local/bin/mkr update --status maintenance
+    exit 0
+
+- name: reload mackerel-agent
+  service: name=mackerel-agent state=reloaded
+
+- name: set status normal
+  shell: |
+    [ ! -f /var/lib/mackerel-agent/id ] && exit 0
+    fgrep -q '[sby]' /etc/motd
+    if [ $? -eq 0 ]; then
+      /usr/local/bin/mkr update --status standby
+    else
+      /usr/local/bin/mkr update --status working
+    fi

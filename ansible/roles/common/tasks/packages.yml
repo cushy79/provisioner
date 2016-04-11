@@ -1,0 +1,35 @@
+---
+- package: name={{ item }} state=present
+  with_items:
+    - gcc
+    - git
+    - dstat
+    - sysstat
+    - iotop
+    - jq
+    - figlet
+
+- apt: name={{ item }} state=present
+  with_items:
+    - unzip
+    - libmysql++-dev
+    - libssl-dev
+    - libreadline6-dev
+    - libffi-dev
+    - zlib1g-dev
+  when: ansible_distribution == 'Ubuntu'
+
+- yum: name={{ item }} state=present enablerepo=epel
+  with_items:
+    - iftop
+    - mysql-devel
+    - openssl-devel
+    - readline-devel
+    - libffi-devel
+    - zlib-devel
+  when: ansible_distribution == 'Amazon'
+
+- pip: name={{ item }} state=present
+  with_items:
+    - ansible
+    - MySQL-python

@@ -1,0 +1,24 @@
+apikey = "{{ mackerel_agent_apikey }}"
+{% if mackerel_agent_pidfile is defined %}
+pidfile = "{{ mackerel_agent_pidfile }}"
+{% endif %}
+{% if mackerel_agent_root is defined %}
+root = "{{ mackerel_agent_root }}"
+{% endif %}
+{% if mackerel_agent_verbose is defined %}
+verbose = {% if mackerel_agent_verbose -%} true {% else -%} false {%- endif %}
+{% endif %}
+
+include = "{{ mackerel_confdir }}/conf*.d/*.conf"
+
+[host_status]
+on_start = "working"
+on_stop  = "poweroff"
+
+{% if mackerel_agent_plugins is defined %}
+{% for key, command in mackerel_agent_plugins.items() %}
+[plugin.metrics.{{ key }}]
+command = "{{ command }}"
+
+{% endfor %}
+{% endif %}

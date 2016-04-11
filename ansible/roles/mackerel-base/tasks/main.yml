@@ -1,0 +1,20 @@
+---
+- name: get env
+  include: get_env.yml
+
+- block:
+    - name: install mackerel (debian)
+      include: install_debian.yml
+    - name: do debian specific tasks
+      include: debian_specific_tasks.yml
+  when: "ansible_os_family == 'Debian'"
+
+- block:
+    - name: install mackerel (redhat)
+      include: install_redhat.yml
+    - name: do redhat specific tasks
+      include: redhat_specific_tasks.yml
+  when: "ansible_os_family == 'RedHat'"
+
+- include: update_extra_plugins.yml
+- include: update_mackerel_conf.yml

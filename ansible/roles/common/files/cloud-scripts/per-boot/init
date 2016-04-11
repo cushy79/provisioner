@@ -1,0 +1,13 @@
+#!/usr/local/rbenv/shims/ruby
+
+# 毎起動時に呼ばれる
+
+require 'syslog/logger'
+
+log = Syslog::Logger.new 'scripts-per-boot'
+log.info 'init.rb start'
+
+system("/opt/ec2/setup")
+system("/opt/ec2/update-role")
+
+system("chmod 755 /etc/ssh/authorized_keys")

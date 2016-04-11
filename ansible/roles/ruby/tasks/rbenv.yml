@@ -1,0 +1,17 @@
+---
+- stat: path=/etc/profile.d/rbenv.sh
+  register: rbenv_sh
+
+- block:
+  - git: repo=https://github.com/sstephenson/rbenv.git dest={{ rbenv.path }}
+  - git: repo=https://github.com/sstephenson/ruby-build.git dest={{ rbenv.path }}/plugins/ruby-build
+  - file: dest={{ rbenv.path }}/{{ item }} state=directory
+    with_items:
+      - shims
+      - versions
+  - template: src=rbenv.sh.j2 dest=/etc/profile.d/rbenv.sh mode=0775
+  when: not rbenv_sh.stat.exists
+
+# cloud-scriptsのper-*系のスクリプトを実行するために必要な設定
+- file: src={{ rbenv.path }}/shims/ruby dest=/usr/bin/ruby force=true state=link
+- file: src={{ rbenv.path }}/shims/gem dest=/usr/bin/gem force=true state=link

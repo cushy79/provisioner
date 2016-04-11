@@ -1,0 +1,11 @@
+---
+ruby:
+  version: 2.3.0
+  gems:
+    - { name: 'bundler', version: '1.9.2' }
+    - { name: 'rake', version: '10.4.2' }
+    - { name: 'pry', version: '0.10.3' }
+    - { name: 'aws-sdk', version: '2.2.15' }
+    - { name: 'activesupport', version: '4.2.5.1' }
+rbenv:
+  path: /usr/local/rbenv

@@ -1,0 +1,36 @@
+machine:
+  timezone:
+    Asia/Tokyo
+  environment:
+    PATH: $HOME/.packer:$PATH
+    PACKER_VERSION: 0.9.0
+test:
+  override:
+    - echo "no test"
+dependencies:
+  cache_directories:
+    - $HOME/.packer
+  pre:
+    - |
+      mkdir -p $HOME/.packer
+      if [ -z "$(ls -A $HOME/.packer)" ]; then
+        cd $HOME/.packer
+        curl -LO https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_amd64.zip
+        unzip packer_${PACKER_VERSION}_linux_amd64.zip
+        rm packer_${PACKER_VERSION}_linux_amd64.zip
+      fi
+deployment:
+  feature:
+    branch: /^(?!(master|develop)).*$/
+    commands:
+      - zip -r /tmp/$CIRCLE_SHA1.zip . -x "*.git*"
+      - aws s3 --region ap-northeast-1 cp --acl bucket-owner-full-control --metadata branch=$CIRCLE_BRANCH,sha1=$CIRCLE_SHA1 /tmp/$CIRCLE_SHA1.zip s3://net.cushy79.staging.common.code.ami/circleci-build-${CIRCLE_BUILD_NUM}.zip
+  staging:
+    tag: staging
+    commands:
+      - zip -r /tmp/$CIRCLE_SHA1.zip . -x "*.git*"
+      - aws s3 --region ap-northeast-1 cp --acl bucket-owner-full-control /tmp/$CIRCLE_SHA1.zip s3://net.cushy79.staging.common.code.ami/latest.zip
+  release-base:
+    tag: /base-.*/
+    commands:
+      - packer build -var-file packer/variables/common.json -var aws_access_key=$AWS_ACCESS_KEY_ID -var aws_secret_key=$AWS_SECRET_ACCESS_KEY packer/base.json

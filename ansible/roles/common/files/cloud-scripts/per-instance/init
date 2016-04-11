@@ -1,0 +1,8 @@
+#!/usr/local/rbenv/shims/ruby
+
+# PackerによるAMI作成時と、EC2起動時の2回呼ばれる
+
+require 'syslog/logger'
+
+log = Syslog::Logger.new 'scripts-per-instance'
+log.info 'init.rb start'

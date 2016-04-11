@@ -1,0 +1,15 @@
+---
+- user: name={{ item | basename }} shell=/bin/bash groups=developers
+  with_fileglob: authorized_keys/*
+
+- file: path=/etc/ssh/authorized_keys state=directory owner=root group=root mode=0755
+- copy: src=authorized_keys/{{ item | basename }} dest=/etc/ssh/authorized_keys owner=root group=root mode=0644
+  with_fileglob: authorized_keys/*
+
+- synchronize:
+        src: authorized_keys/
+        dest: /etc/ssh/authorized_keys
+        archive: false
+        delete: true
+        dirs: true
+        rsync_opts: [ --ignore-existing ]

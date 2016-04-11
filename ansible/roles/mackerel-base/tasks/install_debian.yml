@@ -1,0 +1,30 @@
+---
+# オフィシャルには以下のコマンド。これを展開してPlaybook化している。
+#   curl https://mackerel.io/assets/files/scripts/setup-apt.sh | sh
+#
+
+- name: install mackerel apt source
+  copy:
+    src: _debian/etc/apt/sources.list.d/mackerel.list
+    dest: /etc/apt/sources.list.d/mackerel.list
+    owner: root
+    group: root
+    mode: 0644
+
+- name: install mackerel apt key
+  apt_key:
+    data: "{{ lookup('file', '_debian/GPG-KEY-mackerel') }}"
+    state: present
+
+- name: install mackerel packages
+  apt:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - mackerel-agent
+    - mackerel-agent-plugins
+    - mackerel-check-plugins
+    - mkr
+  register: install_mackerel
+
+- service: name=mackerel-agent enabled=false
